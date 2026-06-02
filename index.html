@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes, viewport-fit=cover">
+<title>سیستم تبدیل حروف به عدد ابجد</title>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  direction: rtl;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: #f0f2f5;
+  padding: 12px;
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.top-buttons-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.glass-btn-custom {
+  width: 80px;
+  height: 55px;
+  background: rgba(25, 118, 210, 0.35);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.glass-btn-custom:hover {
+  background: rgba(25, 118, 210, 0.55);
+  transform: scale(1.02);
+}
+
+.btn-clear-custom {
+  background: rgba(220, 53, 69, 0.35);
+}
+
+.btn-clear-custom:hover {
+  background: rgba(220, 53, 69, 0.55);
+}
+
+.table-scroll-wrapper {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
+}
+
+.scroll-table {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  table-layout: auto;
+}
+
+.scroll-table th, .scroll-table td {
+  border: 1px solid #ccc;
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px 8px;
+  font-size: 14px;
+  min-width: 80px;
+  height: 55px;
+  background-color: white;
+  position: relative;
+  color: black;
+}
+
+.scroll-table thead tr th {
+  position: sticky;
+  top: 0;
+  background-color: #2c3e50;
+  color: white;
+  z-index: 20;
+}
+
+.scroll-table th:nth-child(1),
+.scroll-table td:nth-child(1) {
+  position: sticky;
+  right: 0;
+  background-color: #2c3e50;
+  z-index: 15;
+  box-shadow: 2px 0 0 0 #ccc;
+}
+
+.scroll-table th:nth-child(2),
+.scroll-table td:nth-child(2) {
+  position: sticky;
+  right: 80px;
+  background-color: #e8f0fe;
+  z-index: 15;
+  box-shadow: 2px 0 0 0 #ccc;
+}
+
+.scroll-table th:nth-child(3),
+.scroll-table td:nth-child(3) {
+  position: sticky;
+  right: 160px;
+  background-color: white;
+  z-index: 15;
+  box-shadow: 2px 0 0 0 #ccc;
+}
+
+.scroll-table th:nth-child(1),
+.scroll-table th:nth-child(2),
+.scroll-table th:nth-child(3) {
+  background-color: #2c3e50;
+  color: white;
+  z-index: 25;
+}
+
+.scroll-table th {
+  background-color: #2c3e50;
+  color: white;
+  font-weight: bold;
+}
+
+.scroll-table td.fixed-cell {
+  background-color: #e8f0fe;
+  font-weight: bold;
+  cursor: default;
+  user-select: none;
+}
+
+.scroll-table td.editable-cell {
+  cursor: text;
+}
+
+.scroll-table td.editable-cell:focus {
+  outline: 2px solid #3498db;
+  background-color: #e8f4fd;
+}
+
+.cell-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell-number {
+  display: block;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: black;
+}
+
+.cell-text {
+  display: block;
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: black;
+  margin-top: 2px;
+}
+
+.glass-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(26, 122, 110, 0.25);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.6);
+  color: #0d4f4f;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  transition: 0.2s;
+}
+
+.glass-btn:hover {
+  background: rgba(26, 122, 110, 0.5);
+  transform: scale(1.05);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.controls button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  border: none;
+  border-radius: 8px;
+  background: #1a7a6e;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.controls button:hover {
+  background: #0d4f4f;
+}
+
+.controls .btn-special {
+  background: #2c3e50;
+}
+
+.bottom {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.bottom input {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #b2d8d3;
+  font-family: inherit;
+  font-size: 14px;
+  background: white;
+  outline: none;
+  width: 200px;
+}
+
+.bottom button {
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #1a7a6e;
+  color: white;
+  cursor: pointer;
+}
+
+#pinLock {
+  position: fixed;
+  inset: 0;
+  background: #f0faf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.pin-box {
+  background: white;
+  padding: 28px 30px;
+  border-radius: 14px;
+  box-shadow: 0 5px 20px rgba(13,79,79,0.18);
+  text-align: center;
+  min-width: 270px;
+}
+
+.pin-box input {
+  width: 100%;
+  padding: 10px;
+  font-size: 1.4rem;
+  text-align: center;
+  border-radius: 8px;
+  border: 1px solid #b2d8d3;
+  font-family: inherit;
+  margin-top: 6px;
+}
+
+.pin-box button {
+  margin-top: 14px;
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #1a7a6e;
+  color: white;
+  cursor: pointer;
+}
+
+.modal, .submodal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  width: 70%;
+  max-width: 320px;
+  text-align: center;
+  direction: rtl;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  cursor: grab;
+  position: relative;
+  margin: 0 auto;
+}
+
+.submodal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  width: 85%;
+  max-width: 800px;
+  text-align: center;
+  direction: rtl;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  cursor: grab;
+  position: relative;
+  margin: 0 auto;
+}
+
+.submodal-content.criteria-modal {
+  width: 50%;
+  max-width: 500px;
+  min-width: 300px;
+}
+
+.modal-content:active, .submodal-content:active {
+  cursor: grabbing;
+}
+
+.modal-content h2, .submodal-content h3 {
+  margin: 0 0 8px 0;
+  color: #1a7a6e;
+  font-size: 1.1rem;
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-buttons button {
+  padding: 8px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 8px;
+  background: #2c3e50;
+  color: white;
+  cursor: pointer;
+}
+
+.modal-buttons button:nth-child(1) { background: #e67e22; }
+.modal-buttons button:nth-child(2) { background: #2980b9; }
+.modal-buttons button:nth-child(3) { background: #27ae60; }
+.modal-buttons button:nth-child(4) { background: #8e44ad; }
+.modal-buttons button:nth-child(5) { background: #c0392b; }
+
+.close-modal {
+  margin-top: 10px;
+  padding: 6px;
+  font-size: 0.8rem;
+  background: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.two-tables-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.table-wrapper {
+  flex: 1;
+  min-width: 250px;
+}
+
+.table-wrapper h4 {
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.decimal-table {
+  border-collapse: collapse;
+  margin: 0 auto;
+  font-size: 12px;
+  direction: rtl;
+  width: 100%;
+}
+
+.decimal-table th, .decimal-table td {
+  border: 1px solid #ddd;
+  padding: 5px 6px;
+  text-align: center;
+}
+
+.decimal-table th {
+  background-color: #2c3e50;
+  color: white;
+}
+
+.decimal-table td {
+  background-color: #fff;
+}
+
+.detail-table td {
+  background-color: #fff;
+  cursor: text;
+}
+
+.detail-table td:focus {
+  outline: 2px solid #3498db;
+  background-color: #e8f4fd;
+}
+
+.toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  padding: 5px 10px;
+  margin: 10px 5px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  transition: transform 0.1s, background 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.toggle-btn.off {
+  background: #95a5a6;
+}
+
+.color-palette {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  padding: 12px;
+  z-index: 10002;
+  display: grid;
+  grid-template-columns: repeat(8, 32px);
+  gap: 6px;
+}
+
+.color-option {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid #ddd;
+  transition: 0.1s;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+  border-color: #333;
+}
+
+.color-option.remove-color {
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #e53935;
+}
+
+.color-option.remove-color:hover {
+  background: #ffeeee;
+}
+
+.colored-cell {
+  transition: background-color 0.2s;
+}
+
+.report-btn {
+  padding: 4px 8px;
+  background: #1a7a6e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.criteria-table-container {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  margin: 6px 0;
+}
+
+.criteria-table {
+  border-collapse: collapse;
+  margin: 0 auto;
+  font-size: 14px;
+  direction: rtl;
+  width: 100%;
+}
+
+.criteria-table th, .criteria-table td {
+  border: 1px solid #ddd;
+  padding: 8px 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.criteria-table th {
+  background-color: #2c3e50;
+  color: white;
+}
+
+.criteria-table td {
+  cursor: text;
+  background-color: #fff;
+}
+
+.criteria-table td:focus {
+  outline: 2px solid #3498db;
+  background-color: #e8f4fd;
+}
+
+@media (max-width: 768px) {
+  body { padding: 8px; }
+  .glass-btn-custom { width: 70px; height: 50px; font-size: 0.8rem; }
+  .scroll-table th, .scroll-table td { padding: 6px 4px; font-size: 12px; min-width: 65px; height: 45px; }
+  .scroll-table th:nth-child(2), .scroll-table td:nth-child(2) { right: 65px; }
+  .scroll-table th:nth-child(3), .scroll-table td:nth-child(3) { right: 130px; }
+  .color-palette { grid-template-columns: repeat(6, 28px); }
+  .color-option { width: 28px; height: 28px; }
+  .modal-content { width: 80%; max-width: 280px; padding: 8px; }
+  .submodal-content { width: 95%; padding: 8px; }
+  .submodal-content.criteria-modal { width: 90%; }
+  .two-tables-container { flex-direction: column; gap: 15px; }
+  .toggle-btn { width: 55px; padding: 4px 6px; font-size: 0.7rem; }
+  .criteria-table th, .criteria-table td { padding: 6px 8px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div id="pinLock">
+  <div class="pin-box">
+    <h3>رمز ورود</h3>
+    <input id="pinInput" type="password" inputmode="numeric" maxlength="2">
+    <button onclick="checkPIN()">ورود</button>
+    <div id="pinError" style="color:#e53935;margin-top:8px;display:none;">رمز اشتباه است</div>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="btn1" class="btn-special">📊 گزارش</button>
+  <button id="btn2" class="btn-special">📋 کپی</button>
+  <button id="btn3" class="btn-special">⚙️ تنظیمات</button>
+</div>
+
+<div class="main-wrapper">
+  <div class="top-buttons-bar">
+    <button id="calcBtn" class="glass-btn-custom">محاسبه</button>
+    <button id="clearBtn" class="glass-btn-custom btn-clear-custom">پاک کردن</button>
+  </div>
+  <div class="table-scroll-wrapper">
+    <table class="scroll-table" id="mainTable">
+      <thead id="tableHeader"></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="bottom">
+  <input id="fullname" placeholder="نام و نام خانوادگی" oninput="saveName()">
+  <button onclick="exportData()">💾 خروجی</button>
+</div>
+
+<div id="settingsModal" class="modal">
+  <div class="modal-content draggable-modal" id="settingsModalContent">
+    <h2>⚙️ تنظیمات</h2>
+    <div class="modal-buttons">
+      <button id="option1Btn">🎨 جدول رنگها</button>
+      <button id="option2Btn">📊 معیار جمع</button>
+      <button id="option3Btn">📈 گزینه ۳</button>
+      <button id="option4Btn">🔒 گزینه ۴</button>
+      <button id="option5Btn">🔄 گزینه ۵</button>
+    </div>
+    <button class="close-modal" onclick="closeSettingsModal()">بستن</button>
+  </div>
+</div>
+
+<div id="subModal" class="submodal">
+  <div class="submodal-content draggable-modal" id="subModalContent">
+    <h3 id="subModalTitle">عنوان</h3>
+    <div id="subModalBody"></div>
+    <div class="submodal-buttons">
+      <button class="btn-save" id="subModalSave">💾 ثبت</button>
+      <button class="btn-back" id="subModalBack">↩️ بازگشت</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== تبدیل حروف به عدد ابجد ====================
+const abjadMap = {
+  'ا': 1, 'أ': 1, 'إ': 1, 'آ': 1, 'ء': 1,
+  'ب': 2, 'ج': 3, 'د': 4, 'ه': 5, 'ة': 400,
+  'و': 6, 'ؤ': 6, 'ز': 7, 'ح': 8, 'ط': 9,
+  'ی': 10, 'ي': 10, 'ئ': 10, 'ى': 10,
+  'ک': 20, 'ك': 20, 'ل': 30, 'م': 40, 'ن': 50,
+  'س': 60, 'ع': 70, 'ف': 80, 'ص': 90, 'ق': 100,
+  'ر': 200, 'ش': 300, 'ت': 400, 'ث': 500, 'خ': 600,
+  'ذ': 700, 'ض': 800, 'ظ': 900, 'غ': 1000,
+  'پ': 0, 'ژ': 0, 'گ': 0, 'چ': 0
+};
+
+function textToAbjadSum(text) {
+  if (!text) return 0;
+  let total = 0;
+  for (let char of text) total += abjadMap[char] || 0;
+  return total;
+}
+
+function toFa(n) {
+  if (n === undefined || n === null) return "";
+  return String(n).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
+}
+
+function toEn(s) {
+  if (s === "" || s === undefined) return "";
+  let result = "";
+  const faDigits = "۰۱۲۳۴۵۶۷۸۹";
+  for (let char of s) {
+    let idx = faDigits.indexOf(char);
+    result += idx !== -1 ? idx : char;
+  }
+  let num = Number(result);
+  return isNaN(num) ? result : num;
+}
+
+// ==================== رمز ====================
+const PIN_CODE = "11";
+function checkPIN() {
+  if (document.getElementById("pinInput").value === PIN_CODE) {
+    document.getElementById("pinLock").style.display = "none";
+    sessionStorage.setItem("pin_ok", "1");
+  } else {
+    document.getElementById("pinError").style.display = "block";
+  }
+}
+document.getElementById("pinInput").addEventListener("keydown", e => { if (e.key === "Enter") checkPIN(); });
+if (sessionStorage.getItem("pin_ok") === "1") document.getElementById("pinLock").style.display = "none";
+
+// ==================== تنظیمات جدول ====================
+const STORAGE_KEY = "last_saved_table";
+
+const COLUMN_TITLES = ["●", "عنوان", "نام", "ابجد کبیر", "نتیجه جمع", "۴", "۵", "۷", "۹", "۱۲", "۳", "۲/۵"];
+const TOTAL_COLUMNS = COLUMN_TITLES.length;
+const FIXED_ROW_TEXTS = ["شخص", "مادر", "پدر", "فامیلی", "همسر", "", "", "", "", ""];
+const DATA_ROWS = 10;
+
+const DIVISION_NUMBERS = { 5: 4, 6: 5, 7: 7, 8: 9, 9: 12, 10: 3, 11: 2.5 };
+let criteriaValues = { 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0 };
+let colorMap = {};
+
+let detailTexts = {};
+let showNumbers = true;
+let showTexts = true;
+
+function getDecimalPartFromNumber(num) {
+  if (typeof num !== 'number') return null;
+  if (num % 1 === 0) return "0";
+  let decimal = num - Math.floor(num);
+  let decimalRounded = Math.round(decimal * 100) / 100;
+  let decimalStr = decimalRounded.toString();
+  if (!decimalStr.startsWith("0.")) decimalStr = "0" + decimalStr;
+  decimalStr = decimalStr.replace(/0+$/, '').replace(/\.$/, '');
+  let result = toFa(parseFloat(decimalStr));
+  if (!result.startsWith("۰.")) result = "۰" + result;
+  return result;
+}
+
+function updateCellDisplay(cell, numberValue, textValue) {
+  cell.innerHTML = "";
+  let container = document.createElement("div");
+  container.className = "cell-content";
+  
+  if (showNumbers && numberValue && numberValue !== "") {
+    let spanNum = document.createElement("span");
+    spanNum.className = "cell-number";
+    spanNum.innerText = numberValue;
+    container.appendChild(spanNum);
+  }
+  if (showTexts && textValue && textValue !== "") {
+    let spanText = document.createElement("span");
+    spanText.className = "cell-text";
+    spanText.innerText = textValue;
+    container.appendChild(spanText);
+  }
+  if ((!showNumbers || !numberValue) && (!showTexts || !textValue)) {
+    cell.innerText = "";
+  } else {
+    cell.appendChild(container);
+  }
+}
+
+function saveDetailText(row, col, text) {
+  const key = `${row}_${col}`;
+  if (text && text.trim() !== "") {
+    detailTexts[key] = text;
+  } else {
+    delete detailTexts[key];
+  }
+  localStorage.setItem("detailTexts", JSON.stringify(detailTexts));
+  
+  let mainCol = decimalToMainCol[col];
+  if (mainCol !== undefined) {
+    let tbody = document.getElementById("tableBody");
+    let rows = tbody.querySelectorAll("tr");
+    let targetDecimal = decimalData.rows[row]?.[col];
+    
+    for (let r = 0; r < rows.length; r++) {
+      let cells = rows[r].querySelectorAll("td");
+      let cell = cells[mainCol];
+      if (cell) {
+        let numberValue = cell.getAttribute("data-number");
+        if (numberValue) {
+          let num = toEn(numberValue);
+          if (typeof num === 'number') {
+            let decimalPart = getDecimalPartFromNumber(num);
+            if ((targetDecimal === "۰" && decimalPart === "0") || (targetDecimal && decimalPart === targetDecimal)) {
+              updateCellDisplay(cell, numberValue, text);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+function loadDetailTexts() {
+  let saved = localStorage.getItem("detailTexts");
+  if (saved) {
+    detailTexts = JSON.parse(saved);
+  }
+}
+
+function setupEnterNavigation() {
+  document.querySelectorAll('.scroll-table td.editable-cell').forEach(cell => {
+    cell.removeEventListener('keydown', handleEnterKey);
+    cell.addEventListener('keydown', handleEnterKey);
+  });
+}
+
+function handleEnterKey(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    let row = e.target.parentElement, nextRow = row.nextElementSibling;
+    if (nextRow) {
+      let nextCell = nextRow.cells[e.target.cellIndex];
+      if (nextCell) nextCell.focus();
+    }
+  }
+}
+
+function createTable() {
+  let thead = document.getElementById("tableHeader"), tbody = document.getElementById("tableBody");
+  thead.innerHTML = ""; tbody.innerHTML = "";
+  let headerRow = document.createElement("tr");
+  for (let i = 0; i < TOTAL_COLUMNS; i++) {
+    let th = document.createElement("th");
+    th.innerText = COLUMN_TITLES[i];
+    headerRow.appendChild(th);
+  }
+  thead.appendChild(headerRow);
+  
+  for (let r = 0; r < DATA_ROWS; r++) {
+    let tr = document.createElement("tr");
+    for (let c = 0; c < TOTAL_COLUMNS; c++) {
+      let td = document.createElement("td");
+      if (c === 0) {
+        let btn = document.createElement("button");
+        btn.innerText = "●";
+        btn.className = "glass-btn";
+        btn.onclick = (function(row) { return function() { alert("دکمه سطر " + (row+1)); }; })(r);
+        td.appendChild(btn);
+      } else if (c === 1) {
+        if (r < 5) {
+          td.innerText = FIXED_ROW_TEXTS[r];
+          td.className = "fixed-cell";
+        } else {
+          td.className = "editable-cell";
+          td.contentEditable = "true";
+          td.innerText = "";
+        }
+      } else {
+        td.className = "editable-cell";
+        td.contentEditable = "true";
+        td.innerText = "";
+      }
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+  setupEnterNavigation();
+}
+
+// ==================== داده‌های جدول خارج قسمتها ====================
+const decimalData = {
+  headers: ["۴", "۵", "۷", "۹", "۱۲", "۳", "۲/۵"],
+  rows: [
+    ["۰", "۰", "۰", "۰", "۰", "۰", "۰"],
+    ["۰.۲۵", "۰.۲", "۰.۱۴", "۰.۱۱", "۰.۰۸", "۰.۳۳", "۰.۴"],
+    ["۰.۵", "۰.۴", "۰.۲۸", "۰.۲۲", "۰.۱۶", "۰.۶۶", "۰.۸"],
+    ["۰.۷۵", "۰.۶", "۰.۴۲", "۰.۳۳", "۰.۲۵", "", "۰.۲"],
+    ["", "۰.۸", "۰.۵۷", "۰.۴۴", "۰.۳۳", "", "۰.۶"],
+    ["", "", "۰.۷۱", "۰.۵۵", "۰.۴۱", "", ""],
+    ["", "", "۰.۸۵", "۰.۶۶", "۰.۵", "", ""],
+    ["", "", "", "۰.۷۷", "۰.۵۸", "", ""],
+    ["", "", "", "۰.۸۸", "۰.۶۶", "", ""],
+    ["", "", "", "", "۰.۷۵", "", ""],
+    ["", "", "", "", "۰.۸۳", "", ""],
+    ["", "", "", "", "۰.۹۱", "", ""]
+  ]
+};
+
+const decimalToMainCol = { 
+  0: 5, 1: 6, 2: 7, 3: 8, 4: 9, 5: 10, 6: 11
+};
+
+// ==================== مدیریت رنگ ====================
+
+function updateColorMap() {
+  colorMap = {};
+  let saved = localStorage.getItem("decimalColors");
+  if (!saved) return;
+  let colorsObj = JSON.parse(saved);
+  
+  for (let [key, color] of Object.entries(colorsObj)) {
+    let match = key.match(/decimal_(\d+)_(\d+)/);
+    if (match) {
+      let row = parseInt(match[1]), col = parseInt(match[2]);
+      let decimalValue = decimalData.rows[row]?.[col];
+      if (decimalValue && decimalValue !== "") {
+        let mainCol = decimalToMainCol[col];
+        if (mainCol !== undefined) {
+          if (!colorMap[mainCol]) colorMap[mainCol] = {};
+          colorMap[mainCol][decimalValue] = color;
+          if (decimalValue === "۰") {
+            colorMap[mainCol]["0"] = color;
+          }
+        }
+      }
+    }
+  }
+}
+
+function saveDecimalColor(row, col, color) {
+  let colors = localStorage.getItem("decimalColors");
+  let colorsObj = colors ? JSON.parse(colors) : {};
+  colorsObj[`decimal_${row}_${col}`] = color;
+  localStorage.setItem("decimalColors", JSON.stringify(colorsObj));
+  updateColorMap();
+  reapplyColors();
+}
+
+function applyColorToCell(cell, colIndex, valueStr) {
+  if (!cell || !valueStr) return;
+  
+  let num = toEn(valueStr);
+  if (typeof num !== 'number') return;
+  
+  let decimalKey = getDecimalPartFromNumber(num);
+  if (!decimalKey) return;
+  
+  if (colorMap[colIndex]) {
+    if (colorMap[colIndex][decimalKey] || colorMap[colIndex][valueStr]) {
+      let color = colorMap[colIndex][decimalKey] || colorMap[colIndex][valueStr];
+      cell.style.backgroundColor = color;
+      cell.classList.add("colored-cell");
+      return;
+    }
+  }
+  
+  cell.style.backgroundColor = "";
+  cell.classList.remove("colored-cell");
+}
+
+function reapplyColors() {
+  let tbody = document.getElementById("tableBody");
+  let rows = tbody.querySelectorAll("tr");
+  for (let r = 0; r < rows.length; r++) {
+    let cells = rows[r].querySelectorAll("td");
+    for (let col = 5; col <= 11; col++) {
+      let cell = cells[col];
+      if (cell && cell.getAttribute("data-number")) {
+        let numberValue = cell.getAttribute("data-number");
+        applyColorToCell(cell, col, numberValue);
+      }
+    }
+  }
+}
+
+// ==================== محاسبه اصلی ====================
+
+function formatDecimalWithoutRounding(value) {
+  let corrected = value + 0.0000000001;
+  let truncated = Math.floor(corrected * 100) / 100;
+  let result = truncated.toFixed(2);
+  if (result.endsWith('.00')) result = result.slice(0, -3);
+  if (result.endsWith('.')) result = result.slice(0, -1);
+  return toFa(parseFloat(result));
+}
+
+function calculateAll() {
+  let tbody = document.getElementById("tableBody");
+  let rows = tbody.querySelectorAll("tr");
+  
+  // ابتدا برای تمام سطرها، اگر نام خالی بود، سلول‌های ابجد و نتیجه جمع و تقسیمات را خالی می‌کنیم
+  for (let r = 0; r < DATA_ROWS; r++) {
+    let cells = rows[r].querySelectorAll("td");
+    let nameText = cells[2]?.innerText.trim() || "";
+    
+    if (nameText === "") {
+      cells[3].innerText = "";
+      cells[4].innerText = "";
+      for (let col = 5; col <= 11; col++) {
+        cells[col].innerText = "";
+        cells[col].style.backgroundColor = "";
+        cells[col].setAttribute("data-number", "");
+      }
+    }
+  }
+  
+  // محاسبه مقادیر ابجد برای سطرهایی که نام دارند
+  for (let r = 0; r < DATA_ROWS; r++) {
+    let cells = rows[r].querySelectorAll("td");
+    let nameText = cells[2]?.innerText.trim() || "";
+    if (nameText !== "") {
+      let abjadSum = textToAbjadSum(nameText);
+      cells[3].innerText = abjadSum !== 0 ? toFa(abjadSum) : "";
+    }
+  }
+  
+  // یافتن ابجد سطر اول (شخص) - فقط اگر نام شخص پر شده باشد
+  let firstRowName = rows[0].querySelectorAll("td")[2]?.innerText.trim() || "";
+  let abjad1Value = 0;
+  if (firstRowName !== "") {
+    abjad1Value = toEn(rows[0].querySelectorAll("td")[3]?.innerText.trim() || "");
+    if (typeof abjad1Value !== 'number') abjad1Value = 0;
+  }
+  
+  // محاسبه نتیجه جمع و تقسیمات فقط برای سطرهایی که نام دارند
+  for (let r = 0; r < DATA_ROWS; r++) {
+    let cells = rows[r].querySelectorAll("td");
+    let nameText = cells[2]?.innerText.trim() || "";
+    
+    if (nameText === "") continue;
+    
+    let currentAbjad = toEn(cells[3]?.innerText.trim() || "");
+    if (typeof currentAbjad !== 'number') currentAbjad = 0;
+    
+    if (r === 0) {
+      cells[4].innerText = "";
+    } else {
+      let total = abjad1Value + currentAbjad;
+      cells[4].innerText = total !== 0 ? toFa(total) : "";
+      
+      for (let col = 5; col <= 11; col++) {
+        let divisor = DIVISION_NUMBERS[col];
+        if (divisor && total !== 0) {
+          let adjustedTotal = total + (criteriaValues[col] || 0);
+          let result = adjustedTotal / divisor;
+          let resultStr = formatDecimalWithoutRounding(result);
+          let numberValue = resultStr;
+          
+          let num = toEn(numberValue);
+          let decimalPart = getDecimalPartFromNumber(num);
+          let textValue = "";
+          for (let [key, val] of Object.entries(detailTexts)) {
+            let match = key.match(/(\d+)_(\d+)/);
+            if (match) {
+              let targetRow = parseInt(match[1]);
+              let targetCol = parseInt(match[2]);
+              let targetMainCol = decimalToMainCol[targetCol];
+              let targetDecimal = decimalData.rows[targetRow]?.[targetCol];
+              if (targetMainCol === col && targetDecimal && 
+                  ((targetDecimal === "۰" && decimalPart === "0") || decimalPart === targetDecimal)) {
+                textValue = val;
+                break;
+              }
+            }
+          }
+          
+          cells[col].setAttribute("data-number", numberValue);
+          updateCellDisplay(cells[col], numberValue, textValue);
+          applyColorToCell(cells[col], col, numberValue);
+        } else if (total === 0) {
+          cells[col].innerText = "";
+          cells[col].style.backgroundColor = "";
+          cells[col].setAttribute("data-number", "");
+        }
+      }
+    }
+  }
+  saveCurrentTableState();
+}
+
+function saveCurrentTableState() {
+  let tbody = document.getElementById("tableBody");
+  let rows = tbody.querySelectorAll("tr");
+  let data = [];
+  for (let r = 0; r < rows.length; r++) {
+    let cells = rows[r].querySelectorAll("td");
+    let rowData = [];
+    for (let c = 0; c < cells.length; c++) {
+      if (c === 0) { rowData.push(""); continue; }
+      if (c === 1 && r < 5) { rowData.push(""); continue; }
+      let value = cells[c].getAttribute("data-number") || cells[c].innerText.trim();
+      rowData.push(value);
+    }
+    data.push(rowData);
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadLastSavedState() {
+  createTable();
+  let saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return;
+  let data = JSON.parse(saved);
+  let tbody = document.getElementById("tableBody");
+  let rows = tbody.querySelectorAll("tr");
+  for (let r = 0; r < rows.length && r < data.length; r++) {
+    let cells = rows[r].querySelectorAll("td");
+    let savedCol = 0;
+    for (let c = 0; c < cells.length; c++) {
+      if (c === 0) continue;
+      if (c === 1 && r < 5) continue;
+      if (savedCol < data[r].length && data[r][savedCol] !== "") {
+        let numberValue = data[r][savedCol];
+        let num = toEn(numberValue);
+        let decimalPart = getDecimalPartFromNumber(num);
+        let textValue = "";
+        for (let [key, val] of Object.entries(detailTexts)) {
+          let match = key.match(/(\d+)_(\d+)/);
+          if (match) {
+            let targetRow = parseInt(match[1]);
+            let targetCol = parseInt(match[2]);
+            let targetMainCol = decimalToMainCol[targetCol];
+            let targetDecimal = decimalData.rows[targetRow]?.[targetCol];
+            if (targetMainCol === c && targetDecimal && 
+                ((targetDecimal === "۰" && decimalPart === "0") || decimalPart === targetDecimal)) {
+              textValue = val;
+              break;
+            }
+          }
+        }
+        cells[c].setAttribute("data-number", numberValue);
+        updateCellDisplay(cells[c], numberValue, textValue);
+        if (numberValue && !isNaN(toEn(numberValue))) {
+          applyColorToCell(cells[c], c, numberValue);
+        }
+      }
+      savedCol++;
+    }
+  }
+  setupEnterNavigation();
+}
+
+function clearAllCells() {
+  let tbody = document.getElementById("tableBody");
+  let rows = tbody.querySelectorAll("tr");
+  for (let r = 0; r < rows.length; r++) {
+    let cells = rows[r].querySelectorAll("td");
+    for (let c = 0; c < cells.length; c++) {
+      if (c === 0) continue;
+      if (c === 1) {
+        if (r < 5) continue;
+        cells[c].innerText = "";
+        continue;
+      }
+      cells[c].innerText = "";
+      cells[c].style.backgroundColor = "";
+      cells[c].setAttribute("data-number", "");
+    }
+  }
+  saveCurrentTableState();
+}
+
+// ==================== صفحات مختلف ====================
+function loadCriteriaValues() {
+  let saved = localStorage.getItem("criteriaValues");
+  if (saved) criteriaValues = JSON.parse(saved);
+}
+function saveCriteriaValues() { localStorage.setItem("criteriaValues", JSON.stringify(criteriaValues)); }
+
+function showCriteriaTable() {
+  let body = document.getElementById("subModalBody");
+  body.innerHTML = "";
+  let container = document.createElement("div");
+  container.className = "criteria-table-container";
+  let table = document.createElement("table");
+  table.className = "criteria-table";
+  let thead = document.createElement("thead");
+  let headerRow = document.createElement("tr");
+  ["۴", "۵", "۷", "۹", "۱۲", "۳", "۲/۵"].forEach(h => {
+    let th = document.createElement("th");
+    th.innerText = h;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+  let tbody = document.createElement("tbody");
+  let dataRow = document.createElement("tr");
+  let colIndices = [5,6,7,8,9,10,11];
+  colIndices.forEach((col, idx) => {
+    let td = document.createElement("td");
+    td.contentEditable = "true";
+    td.innerText = criteriaValues[col] || "0";
+    td.onblur = function() {
+      let val = parseFloat(toEn(this.innerText.trim()));
+      criteriaValues[col] = isNaN(val) ? 0 : val;
+      saveCriteriaValues();
+    };
+    dataRow.appendChild(td);
+  });
+  tbody.appendChild(dataRow);
+  table.appendChild(tbody);
+  container.appendChild(table);
+  body.appendChild(container);
+  
+  const subModalContent = document.getElementById("subModalContent");
+  subModalContent.classList.add("criteria-modal");
+}
+
+function removeCriteriaModalClass() {
+  const subModalContent = document.getElementById("subModalContent");
+  subModalContent.classList.remove("criteria-modal");
+}
+
+function toggleNumbers() {
+  showNumbers = !showNumbers;
+  const btn = document.getElementById("toggleNumbersBtn");
+  if (showNumbers) {
+    btn.classList.remove("off");
+    btn.innerHTML = "اعداد";
+  } else {
+    btn.classList.add("off");
+    btn.innerHTML = "اعداد";
+  }
+  refreshMainTableDisplay();
+}
+
+function toggleTexts() {
+  showTexts = !showTexts;
+  const btn = document.getElementById("toggleTextsBtn");
+  if (showTexts) {
+    btn.classList.remove("off");
+    btn.innerHTML = "متن‌ها";
+  } else {
+    btn.classList.add("off");
+    btn.innerHTML = "متن‌ها";
+  }
+  refreshMainTableDisplay();
+}
+
+function refreshMainTableDisplay() {
+  let tbody = document.getElementById("tableBody");
+  let rows = tbody.querySelectorAll("tr");
+  for (let r = 0; r < rows.length; r++) {
+    let cells = rows[r].querySelectorAll("td");
+    for (let c = 5; c <= 11; c++) {
+      let cell = cells[c];
+      if (cell) {
+        let numberValue = cell.getAttribute("data-number") || "";
+        if (numberValue) {
+          let num = toEn(numberValue);
+          if (typeof num === 'number') {
+            let decimalPart = getDecimalPartFromNumber(num);
+            let textValue = "";
+            for (let [key, val] of Object.entries(detailTexts)) {
+              let match = key.match(/(\d+)_(\d+)/);
+              if (match) {
+                let targetRow = parseInt(match[1]);
+                let targetCol = parseInt(match[2]);
+                let targetMainCol = decimalToMainCol[targetCol];
+                let targetDecimal = decimalData.rows[targetRow]?.[targetCol];
+                if (targetMainCol === c && targetDecimal && 
+                    ((targetDecimal === "۰" && decimalPart === "0") || decimalPart === targetDecimal)) {
+                  textValue = val;
+                  break;
+                }
+              }
+            }
+            updateCellDisplay(cell, numberValue, textValue);
+          }
+        }
+      }
+    }
+  }
+}
+
+function showDecimalAndDetailTables() {
+  let body = document.getElementById("subModalBody");
+  body.innerHTML = "";
+  removeCriteriaModalClass();
+  
+  let controlsDiv = document.createElement("div");
+  controlsDiv.style.display = "flex";
+  controlsDiv.style.justifyContent = "center";
+  controlsDiv.style.gap = "15px";
+  controlsDiv.style.marginBottom = "15px";
+  
+  let numbersBtn = document.createElement("button");
+  numbersBtn.id = "toggleNumbersBtn";
+  numbersBtn.className = "toggle-btn" + (showNumbers ? "" : " off");
+  numbersBtn.innerHTML = "اعداد";
+  numbersBtn.onclick = toggleNumbers;
+  
+  let textsBtn = document.createElement("button");
+  textsBtn.id = "toggleTextsBtn";
+  textsBtn.className = "toggle-btn" + (showTexts ? "" : " off");
+  textsBtn.innerHTML = "متن‌ها";
+  textsBtn.onclick = toggleTexts;
+  
+  controlsDiv.appendChild(numbersBtn);
+  controlsDiv.appendChild(textsBtn);
+  body.appendChild(controlsDiv);
+  
+  let twoTables = document.createElement("div");
+  twoTables.className = "two-tables-container";
+  
+  let wrapper1 = document.createElement("div");
+  wrapper1.className = "table-wrapper";
+  let title1 = document.createElement("h4");
+  title1.innerText = "خارج قسمت رنگی";
+  wrapper1.appendChild(title1);
+  
+  let container1 = document.createElement("div");
+  container1.className = "decimal-table-container";
+  let table1 = document.createElement("table");
+  table1.className = "decimal-table";
+  
+  let thead1 = document.createElement("thead");
+  let headerRow1 = document.createElement("tr");
+  decimalData.headers.forEach(h => {
+    let th = document.createElement("th");
+    th.innerText = h;
+    headerRow1.appendChild(th);
+  });
+  thead1.appendChild(headerRow1);
+  table1.appendChild(thead1);
+  
+  let tbody1 = document.createElement("tbody");
+  let savedColors = localStorage.getItem("decimalColors") ? JSON.parse(localStorage.getItem("decimalColors")) : {};
+  decimalData.rows.forEach((row, i) => {
+    let tr = document.createElement("tr");
+    row.forEach((val, j) => {
+      let td = document.createElement("td");
+      td.innerText = val;
+      if (savedColors[`decimal_${i}_${j}`]) {
+        td.style.backgroundColor = savedColors[`decimal_${i}_${j}`];
+      }
+      td.onclick = (function(r,c,el) { return function(e) { e.stopPropagation(); showColorPalette(r,c,el); }; })(i,j,td);
+      tr.appendChild(td);
+    });
+    tbody1.appendChild(tr);
+  });
+  table1.appendChild(tbody1);
+  container1.appendChild(table1);
+  wrapper1.appendChild(container1);
+  
+  let wrapper2 = document.createElement("div");
+  wrapper2.className = "table-wrapper";
+  let title2 = document.createElement("h4");
+  title2.innerText = "خارج قسمت تفصیری";
+  wrapper2.appendChild(title2);
+  
+  let container2 = document.createElement("div");
+  container2.className = "decimal-table-container";
+  let table2 = document.createElement("table");
+  table2.className = "decimal-table detail-table";
+  
+  let thead2 = document.createElement("thead");
+  let headerRow2 = document.createElement("tr");
+  decimalData.headers.forEach(h => {
+    let th = document.createElement("th");
+    th.innerText = h;
+    headerRow2.appendChild(th);
+  });
+  thead2.appendChild(headerRow2);
+  table2.appendChild(thead2);
+  
+  let tbody2 = document.createElement("tbody");
+  
+  decimalData.rows.forEach((row, i) => {
+    let tr = document.createElement("tr");
+    row.forEach((val, j) => {
+      let td = document.createElement("td");
+      td.contentEditable = "true";
+      td.innerText = val;
+      let savedText = "";
+      for (let [key, text] of Object.entries(detailTexts)) {
+        let match = key.match(/(\d+)_(\d+)/);
+        if (match && parseInt(match[1]) === i && parseInt(match[2]) === j) {
+          savedText = text;
+          break;
+        }
+      }
+      if (savedText !== "") {
+        td.innerText = savedText;
+      }
+      td.onblur = (function(rowIdx, colIdx, element) {
+        return function() {
+          let text = element.innerText.trim();
+          let originalNumber = decimalData.rows[rowIdx][colIdx];
+          if (text !== originalNumber && text !== "") {
+            saveDetailText(rowIdx, colIdx, text);
+          } else if (text === originalNumber || text === "") {
+            saveDetailText(rowIdx, colIdx, "");
+          }
+          if (text === "") {
+            element.innerText = originalNumber;
+          }
+          refreshMainTableDisplay();
+          reapplyColors();
+        };
+      })(i, j, td);
+      tr.appendChild(td);
+    });
+    tbody2.appendChild(tr);
+  });
+  table2.appendChild(tbody2);
+  container2.appendChild(table2);
+  wrapper2.appendChild(container2);
+  
+  twoTables.appendChild(wrapper1);
+  twoTables.appendChild(wrapper2);
+  body.appendChild(twoTables);
+}
+
+function showEmptyPage() {
+  let body = document.getElementById("subModalBody");
+  body.innerHTML = "<p style='text-align:center;margin:20px 0'>✨ این صفحه در حال توسعه است ✨</p>";
+  removeCriteriaModalClass();
+}
+
+function showReport() {
+  return;
+}
+
+function showReportDetail(type) {
+  return;
+}
+
+function generateColors() {
+  let colors = [];
+  for (let i = 0; i < 5; i++) colors.push(`hsl(0, ${70 + i * 5}%, ${55 - i * 5}%)`);
+  for (let i = 0; i < 5; i++) colors.push(`hsl(30, ${70 + i * 5}%, ${55 - i * 5}%)`);
+  for (let i = 0; i < 5; i++) colors.push(`hsl(55, ${70 + i * 5}%, ${55 - i * 5}%)`);
+  for (let i = 0; i < 8; i++) colors.push(`hsl(120, ${60 + i * 4}%, ${50 - i * 3}%)`);
+  for (let i = 0; i < 8; i++) colors.push(`hsl(180, ${60 + i * 4}%, ${50 - i * 3}%)`);
+  for (let i = 0; i < 8; i++) colors.push(`hsl(210, ${60 + i * 4}%, ${50 - i * 3}%)`);
+  for (let i = 0; i < 6; i++) colors.push(`hsl(270, ${60 + i * 5}%, ${55 - i * 4}%)`);
+  for (let i = 0; i < 6; i++) colors.push(`hsl(320, ${60 + i * 5}%, ${55 - i * 4}%)`);
+  colors.push("#FFFFFF","#F5F5F5","#E0E0E0","#CCCCCC","#B3B3B3","#999999","#808080","#666666","#4D4D4D","#333333","#1A1A1A","#000000");
+  return [...new Set(colors)];
+}
+const STANDARD_COLORS = generateColors();
+
+let activePaletteCell = null, activePaletteRow = null, activePaletteCol = null;
+function showColorPalette(row, col, cell) {
+  let existing = document.querySelector(".color-palette");
+  if (existing) existing.remove();
+  activePaletteCell = cell; activePaletteRow = row; activePaletteCol = col;
+  let palette = document.createElement("div");
+  palette.className = "color-palette";
+  STANDARD_COLORS.forEach(c => {
+    let div = document.createElement("div");
+    div.className = "color-option";
+    div.style.backgroundColor = c;
+    div.onclick = () => {
+      if (activePaletteCell) {
+        activePaletteCell.style.backgroundColor = c;
+        saveDecimalColor(activePaletteRow, activePaletteCol, c);
+      }
+      palette.remove();
+    };
+    palette.appendChild(div);
+  });
+  let removeDiv = document.createElement("div");
+  removeDiv.className = "color-option remove-color";
+  removeDiv.innerHTML = "✖";
+  removeDiv.onclick = () => {
+    if (activePaletteCell) {
+      activePaletteCell.style.backgroundColor = "";
+      saveDecimalColor(activePaletteRow, activePaletteCol, null);
+    }
+    palette.remove();
+  };
+  palette.appendChild(removeDiv);
+  document.body.appendChild(palette);
+  setTimeout(() => {
+    document.addEventListener("click", function close(e) {
+      if (!palette.contains(e.target) && e.target !== cell) {
+        palette.remove();
+        document.removeEventListener("click", close);
+      }
+    });
+  }, 10);
+}
+
+function copyData() {
+  let data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    let key = localStorage.key(i);
+    if (key?.startsWith("last_saved_table")) data[key] = JSON.parse(localStorage.getItem(key));
+  }
+  navigator.clipboard.writeText(JSON.stringify(data, null, 2)).then(() => alert("📋 داده‌ها کپی شدند!"));
+}
+
+let currentOptionCallback = null;
+let previousModal = null;
+
+function openSettingsModal() {
+  document.getElementById("settingsModal").style.display = "flex";
+  previousModal = null;
+  const modalContent = document.getElementById("settingsModalContent");
+  modalContent.style.position = "relative";
+  modalContent.style.top = "auto";
+  modalContent.style.left = "auto";
+  modalContent.style.margin = "0 auto";
+}
+
+function closeSettingsModal() {
+  document.getElementById("settingsModal").style.display = "none";
+}
+
+function openSubModalWithContent(title, callback) {
+  document.getElementById("subModalTitle").innerText = title;
+  currentOptionCallback = callback;
+  document.getElementById("subModal").style.display = "flex";
+  previousModal = "settingsModal";
+  const subModalContent = document.getElementById("subModalContent");
+  subModalContent.style.position = "relative";
+  subModalContent.style.top = "auto";
+  subModalContent.style.left = "auto";
+  subModalContent.style.margin = "0 auto";
+}
+
+function closeSubModal() {
+  document.getElementById("subModal").style.display = "none";
+  currentOptionCallback = null;
+  if (previousModal === "settingsModal") {
+    openSettingsModal();
+  }
+  previousModal = null;
+  removeCriteriaModalClass();
+}
+
+function goBack() {
+  if (document.getElementById("subModal").style.display === "flex") {
+    closeSubModal();
+  } else if (document.getElementById("settingsModal").style.display === "flex") {
+    closeSettingsModal();
+  }
+}
+
+function saveSubModal() {
+  if (currentOptionCallback) currentOptionCallback();
+  closeSubModal();
+}
+
+function setupModalClose() {
+  const settingsModal = document.getElementById("settingsModal");
+  const subModal = document.getElementById("subModal");
+  
+  settingsModal.addEventListener("click", function(e) {
+    if (e.target === settingsModal) {
+      closeSettingsModal();
+    }
+  });
+  
+  subModal.addEventListener("click", function(e) {
+    if (e.target === subModal) {
+      closeSubModal();
+    }
+  });
+}
+
+function showOption1() {
+  showDecimalAndDetailTables();
+  openSubModalWithContent("خارج قسمت", null);
+}
+
+function showOption2() {
+  showCriteriaTable();
+  openSubModalWithContent("📊 معیار جمع", null);
+}
+
+function setupSettingsButtons() {
+  document.getElementById("option1Btn").onclick = () => { closeSettingsModal(); showOption1(); };
+  document.getElementById("option2Btn").onclick = () => { closeSettingsModal(); showOption2(); };
+  document.getElementById("option3Btn").onclick = () => { closeSettingsModal(); showEmptyPage(); openSubModalWithContent("📈 گزینه ۳", null); };
+  document.getElementById("option4Btn").onclick = () => { closeSettingsModal(); showEmptyPage(); openSubModalWithContent("🔒 گزینه ۴", null); };
+  document.getElementById("option5Btn").onclick = () => { closeSettingsModal(); showEmptyPage(); openSubModalWithContent("🔄 گزینه ۵", () => { localStorage.clear(); location.reload(); }); };
+}
+
+function saveName() { localStorage.setItem("user_fullname", document.getElementById("fullname").value); }
+function loadName() { document.getElementById("fullname").value = localStorage.getItem("user_fullname") || ""; }
+function exportData() {
+  let data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    let key = localStorage.key(i);
+    if (key?.startsWith("last_saved_table")) data[key] = JSON.parse(localStorage.getItem(key));
+  }
+  let name = localStorage.getItem("user_fullname") || "user";
+  let today = new Date().toLocaleDateString("fa-IR").replace(/\//g, "-");
+  let blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name + " - " + today + ".json";
+  a.click();
+}
+
+function makeDraggable(element) {
+  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  let isDragging = false;
+  
+  element.onmousedown = dragMouseDown;
+  
+  function dragMouseDown(e) {
+    if (e.target !== element && !element.contains(e.target)) return;
+    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TD') return;
+    e = e || window.event;
+    e.preventDefault();
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    isDragging = true;
+    document.onmouseup = closeDragElement;
+    document.onmousemove = elementDrag;
+  }
+  
+  function elementDrag(e) {
+    if (!isDragging) return;
+    e = e || window.event;
+    e.preventDefault();
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    element.style.position = "fixed";
+    element.style.top = (element.offsetTop - pos2) + "px";
+    element.style.left = (element.offsetLeft - pos1) + "px";
+    element.style.margin = "0";
+  }
+  
+  function closeDragElement() {
+    isDragging = false;
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
+
+// ==================== مقداردهی اولیه ====================
+loadName();
+loadLastSavedState();
+loadCriteriaValues();
+loadDetailTexts();
+updateColorMap();
+setupSettingsButtons();
+setupModalClose();
+
+setTimeout(() => {
+  makeDraggable(document.getElementById("settingsModalContent"));
+  makeDraggable(document.getElementById("subModalContent"));
+}, 100);
+
+document.getElementById("calcBtn").addEventListener("click", calculateAll);
+document.getElementById("clearBtn").addEventListener("click", clearAllCells);
+document.getElementById("btn1").addEventListener("click", () => { showReport(); });
+document.getElementById("btn2").addEventListener("click", copyData);
+document.getElementById("btn3").addEventListener("click", openSettingsModal);
+document.getElementById("subModalSave").addEventListener("click", saveSubModal);
+document.getElementById("subModalBack").addEventListener("click", goBack);
+</script>
+</body>
+</html>
