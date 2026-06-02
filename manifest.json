@@ -1,0 +1,11 @@
+{
+  "background_color": "rgb(23, 76, 69)",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "محاسبه اسم",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "محاسبه اسم",
+  "start_url": "/",
+  "theme_color": "rgb(26, 122, 110)"
+}

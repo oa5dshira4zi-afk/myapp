@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes, viewport-fit=cover">
 <title>سیستم تبدیل حروف به عدد ابجد</title>
+
+<!-- ========== لینک به فایل Manifest (مخصوص PWA) ========== -->
+<link rel="manifest" href="manifest.json">
+
 <style>
 * {
   box-sizing: border-box;
@@ -661,6 +665,17 @@ body {
 </div>
 
 <script>
+// ========== ثبت Service Worker (مخصوص PWA) ==========
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/pwabuilder-sw.js').then(function(registration) {
+      console.log('Service Worker registered successfully:', registration.scope);
+    }).catch(function(error) {
+      console.log('Service Worker registration failed:', error);
+    });
+  });
+}
+
 // ==================== تبدیل حروف به عدد ابجد ====================
 const abjadMap = {
   'ا': 1, 'أ': 1, 'إ': 1, 'آ': 1, 'ء': 1,
